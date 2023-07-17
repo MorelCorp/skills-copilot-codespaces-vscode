@@ -1,27 +1,42 @@
-// create web server with express
-const express = require('express');
-const app = express();
+//create web server with express
+const express = require('express')
+const router = express.Router()
+//include the model (db connection)
+const Comment = require('../models/comment')
+//create the routes
+//index
+router.get('/', (req, res) => {
+    Comment.find()
+    .then((comments) => {
+        res.render('comments/index', {
+            comments: comments
+        })
+    })
+    .catch((error) => {
+        console.log(error)
+    })
+})
+//new
+router.get('/new', (req, res) => {
+    res.render('comments/new', {
+        comment: new Comment()
+    })
+})
+//create
+router.post('/', (req, res) => {
+    const comment = new Comment({
+        name: req.body.name,
+        comment: req.body.comment
+    })
+    comment.save()
+    .then((comment) => {
+        res.redirect('/comments')
+    })
+    .catch((error) => {
+        console.log(error)
+    })
+})
+//export the router
+module.exports = router
 
-// create a router to handle routes
-const router = express.Router();
 
-// import our controller
-const commentsController = require('../controllers/commentsController');
-
-// handle GET request at /comments
-router.get('/', commentsController.comments);
-
-// handle POST request at /comments
-router.post('/', commentsController.postComment);
-
-// handle GET request at /comments/:commentId
-router.get('/:commentId', commentsController.comment);
-
-// handle PUT request at /comments/:commentId
-router.put('/:commentId', commentsController.putComment);
-
-// handle DELETE request at /comments/:commentId
-router.delete('/:commentId', commentsController.deleteComment);
-
-// export router
-module.exports = router;
